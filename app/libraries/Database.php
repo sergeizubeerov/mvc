@@ -1,38 +1,44 @@
 <?php
-
-
-// PDO class
-
-class Database{
+/*
+ * PDO Database Class
+ * Connect to database
+ * Create prepared statements
+ * Bind values
+ * Return rows and results
+ */
+class Database {
     private $host = DB_HOST;
     private $user = DB_USER;
     private $pass = DB_PASS;
     private $dbname = DB_NAME;
+
     private $dbh;
     private $stmt;
     private $error;
 
     public function __construct(){
-        // set dsn
+        // Set DSN
         $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname;
         $options = array(
             PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-
         );
-        // create PDO instance
-        try {
+
+        // Create PDO instance
+        try{
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
-        } catch (PDOException $e){
+        } catch(PDOException $e){
             $this->error = $e->getMessage();
             echo $this->error;
         }
     }
-    // prepare statement with query
+
+    // Prepare statement with query
     public function query($sql){
         $this->stmt = $this->dbh->prepare($sql);
     }
-    //bind values
+
+    // Bind values
     public function bind($param, $value, $type = null){
         if(is_null($type)){
             switch(true){
@@ -49,26 +55,29 @@ class Database{
                     $type = PDO::PARAM_STR;
             }
         }
+
         $this->stmt->bindValue($param, $value, $type);
-        // we make the query, we bind the value and we execute !
-        public function execute(){
-            return $this->stmt->execute();
-        }
+    }
 
-        // get results set as array of objects
-        public function resultSet(){
-            $this->execute();
-            return $this->stmt->fetchAll(PDO::FETCH_OBJ);
+    // Execute the prepared statement
+    public function execute(){
+        return $this->stmt->execute();
+    }
 
-        }
-        // this will get single record as object
-        public function single(){
-            $this->execute();
-            return $this->stmt->fetch(PDO::FETCH_OBJ);
-        }
-        // row count
-        public function rowCount(){
-             return $this->stmt->rowCount();
-        }
+    // Get result set as array of objects
+    public function resultSet(){
+        $this->execute();
+        return $this->stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    // Get single record as object
+    public function single(){
+        $this->execute();
+        return $this->stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    // Get row count
+    public function rowCount(){
+        return $this->stmt->rowCount();
     }
 }
